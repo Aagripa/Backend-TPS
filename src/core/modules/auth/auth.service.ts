@@ -354,10 +354,13 @@ export class AuthService {
       return uploadedFile; // Return the uploaded file details if needed
     } else {
       // File extension is not allowed, throw an error
-      throw new HttpException('File tidak valid, hanya menerima JPG, JPEG, dan PNG.', HttpStatus.OK);
+      throw new HttpException('File tidak valid, hanya menerima JPG, JPEG, dan PNG.', HttpStatus.BAD_REQUEST);
     }
   } catch (error) {
-    throw new HttpException('File tidak valid, hanya menerima JPG, JPEG, dan PNG.', HttpStatus.OK);
+    if (error instanceof ForbiddenException) {
+      throw new HttpException('User sudah memiliki avatar', HttpStatus.FORBIDDEN);
+    }
+    throw new HttpException('Gagal mengunggah file: ' + error.message, HttpStatus.BAD_REQUEST);
   }
 }
 
@@ -369,7 +372,7 @@ async updateUserAvatar(userId: string, data: string): Promise<any> {
   } catch (error) {
     // Tangani pengecualian di sini jika diperlukan
     throw new ForbiddenException(
-      'Failed to update user avatar: ' + error.message,
+      'Gagal update user avatar: ' + error.message,
     );
   }
 }
