@@ -209,13 +209,5 @@ async updateAvatar(
     return 'Successfully deleted';
   }
 
-  // @Post('reset-password')
-  // async resetPassword(
-  //   @Body('token') token: string,
-  //   @Body('password') newPassword: string,
-  //   @Body('repassword') confirmPassword: string,
-  // ) {
-  //   await this.authService.resetPassword(token, newPassword, confirmPassword);
-  //   return 'Password reset successfully';
-  // }
+
 }
