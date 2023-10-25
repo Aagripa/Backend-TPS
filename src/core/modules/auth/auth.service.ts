@@ -25,9 +25,6 @@ export class AuthService {
     private readonly uploadService: UploadService,
   ) {}
 
-
-
-
   async forgotPassword(email: string) {
     const user = await this.userService.findOneByEmail(email);
     if (!user) {
