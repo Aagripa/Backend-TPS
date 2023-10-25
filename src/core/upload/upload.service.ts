@@ -22,7 +22,7 @@ export class UploadService {
     const avatar = await this.getOneByUserId(userId);
 
     if (avatar) {
-      throw new ForbiddenException('This user already has an avatar');
+      throw new ForbiddenException('User sudah punya avatar');
     }
 
     const newFile = await this.databaseFilesRepository.create({
@@ -49,7 +49,7 @@ export class UploadService {
 
     // Jika avatar tidak ditemukan, lempar pengecualian NotFound
     if (!avatar) {
-      throw new NotFoundException('Avatar not found');
+      throw new NotFoundException('Tidak ada avatar');
     }
     // Jika avatar ditemukan, kembalikan objek avatar
     return avatar;
@@ -75,7 +75,7 @@ export class UploadService {
   async update(data: string, userId: string) {
     const existingAvatar = await this.getOneByUserId(userId);
     if (!existingAvatar) {
-      throw new ForbiddenException("User doesn't have an avatar");
+      throw new ForbiddenException("User tidak punya avatar");
     }
   
     // Lakukan pembaruan avatar berdasarkan userId, data, dan filename
@@ -86,7 +86,7 @@ export class UploadService {
   
     // Pastikan pembaruan berhasil dan ada file yang diperbarui
     if (numberOfAffectedRows === 0 || !updatedFile) {
-      throw new NotFoundException("Avatar not found or update failed");
+      throw new NotFoundException("Avatar kosong");
     }
   
     // Kembalikan data avatar yang diperbarui
