@@ -85,9 +85,8 @@ export class AuthController {
     }
   }
 
-  @hasRoles(UserRole.SUPERADMIN)
-  @UseGuards(AuthGuard('jwt'), RolesGuard, DoesUserExist)
-
+  // @hasRoles(UserRole.SUPERADMIN)
+  // @UseGuards(AuthGuard('jwt'), RolesGuard, DoesUserExist)
   @Post('/signup')
   async registerAndSendPassword(@Body() user: UserDto) {
     // Panggil metode create di AuthService untuk membuat pengguna dengan kata sandi acak

@@ -60,11 +60,12 @@ export class TeamController {
 
   // @hasRoles(UserRole.ADMIN)
   @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @ApiParam({ name: 'namaTim', type: 'string' }, )
+  @ApiParam({ name: 'namaTim', type: 'string' })
   @Post()
   async create(@Body() team: TeamDto, @Request() req): Promise<TeamEntity> {
     // Buat tim baru dan kembalikan tim yang baru dibuat
-    return await this.teamService.create(team, req.user.nip);
+    const newTeam = await this.teamService.create(team, req.user.nip);
+    return newTeam; // Jangan lupa mengembalikan hasil pembuatan tim
   }
 
   // @hasRoles(UserRole.ADMIN)
@@ -77,7 +78,7 @@ export class TeamController {
     try {
       const updatedTeam = await this.teamService.addMember(
         idTim,
-        memberDTO.memberId,
+        memberDTO.idMember,
       );
       return updatedTeam;
     } catch (error) {
@@ -119,13 +120,15 @@ export class TeamController {
     }
   }
 
- @Get('members/:idTim')
+  @Get('members/:idTim')
   async findMembersByTeamId(@Param('idTim') idTim: number): Promise<Member[]> {
-      const members = await this.teamService.findMembersByTeamId(idTim);
-      if (!members || members.length === 0) {
-        throw new HttpException (`No members found for team with ID`, HttpStatus.OK);
-      }
-      return members;
+    const members = await this.teamService.findMembersByTeamId(idTim);
+    if (!members || members.length === 0) {
+      throw new HttpException(
+        `No members found for team with ID`,
+        HttpStatus.OK,
+      );
+    }
+    return members;
   }
-
 }
