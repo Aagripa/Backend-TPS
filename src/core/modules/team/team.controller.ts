@@ -78,7 +78,7 @@ export class TeamController {
     try {
       const updatedTeam = await this.teamService.addMember(
         idTim,
-        memberDTO.idMember,
+        memberDTO.memberId,
       );
       return updatedTeam;
     } catch (error) {
