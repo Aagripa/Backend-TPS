@@ -42,6 +42,12 @@ export class Task extends Model<Task> {
   })
   status: Status;
 
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  comment: string;
+
   // Menambahkan foreign key idTim dari Team
   @ForeignKey(() => Team)
   @Column({

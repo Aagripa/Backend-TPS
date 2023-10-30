@@ -3,7 +3,7 @@ import { IsString, IsOptional } from 'class-validator';
 
 export class TaskDto {
   @IsString()
-  name: string;
+  name?: string;
 
   @IsOptional()
   dueDate?: string;
@@ -11,4 +11,5 @@ export class TaskDto {
   status: Status;
   forUser: string;
   parentId?: number;
+  comment?: string;
 }
