@@ -1,5 +1,5 @@
 
-export enum Status {
+export enum ProjectStatus {
     Pending = 'pending',
     InProgress = 'in-progress',
     Completed = 'completed',

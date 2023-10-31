@@ -7,7 +7,7 @@ import {
   BelongsTo,
   HasMany,
 } from 'sequelize-typescript';
-import { Status } from './project.enum';
+import { ProjectStatus } from './project.enum';
 import { Team } from '../team/team.entity';
 import { Task } from '../task/task.entity';
 
@@ -37,14 +37,14 @@ export class Project extends Model<Project> {
     type: DataType.STRING,
     allowNull: true,
   })
-  taskDesc: string;
+  projectDesc: string;
 
   @Column({
     type: DataType.ENUM('Pending', 'InProgress', 'Completed'),
     allowNull: false,
     defaultValue: 'Pending',
   })
-  status: Status;
+  status: ProjectStatus;
 
   @ForeignKey(() => Team) // Menunjukkan foreign key ke model Team
   @Column({

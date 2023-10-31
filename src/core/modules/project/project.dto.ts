@@ -1,9 +1,9 @@
-import { Status } from './project.enum';
+import { ProjectStatus } from "./project.enum";
 
 export class ProjectDto {
   readonly idProject?: number; // Ubah agar opsional
   readonly projectName: string;
   dueDate?: string;
-  taskDesc?: string;
-  status?: Status; // Tambahkan tanda ? untuk opsional
+  projectDesc?: string;
+  status?: ProjectStatus; // Tambahkan tanda ? untuk opsional
 }
