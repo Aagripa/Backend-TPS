@@ -134,4 +134,19 @@ async getTasksByForUser(forUser: string): Promise<Task[]> {
   }
   return tasks;
 }
+
+async getTasksByProjectId(projectId: number): Promise<Task[]> {
+  const tasks = await this.taskRepository.findAll<Task>({
+    where: {
+      projectId: projectId,
+    },
+    include: [{ all: true }], // Mengambil semua data terkait
+  });
+
+  if (!tasks || tasks.length === 0) {
+    throw new NotFoundException(`No tasks found for project with ID ${projectId}`);
+  }
+
+  return tasks;
+}
 }

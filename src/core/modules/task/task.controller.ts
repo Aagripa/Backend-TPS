@@ -96,4 +96,8 @@ async create(
   
     }
 
+    @Get('project/:projectId')
+  async getTasksByProjectId(@Param('projectId') projectId: number): Promise<Task[]> {
+    return this.taskService.getTasksByProjectId(projectId);
+  }
 }
