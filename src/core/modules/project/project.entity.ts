@@ -31,7 +31,13 @@ export class Project extends Model<Project> {
     type: DataType.STRING,
     allowNull: true,
   })
-  dueDate: string;
+  startDate: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  endDate: string;
 
   @Column({
     type: DataType.STRING,

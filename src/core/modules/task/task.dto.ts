@@ -6,7 +6,8 @@ export class TaskDto {
   name?: string;
 
   @IsOptional()
-  dueDate?: string;
+  startDate?: string;
+  endDate?: string;
   taskDesc?: string;
   status: Status;
   forUser: string;
