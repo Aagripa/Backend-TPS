@@ -8,7 +8,7 @@ import {
   HasMany,
 } from 'sequelize-typescript';
 import { Team } from '../team/team.entity';
-import { Member } from '../member/member.entity';
+import { User } from '../users/user.entity';
 import { Status } from './status.enum';
 import { Project } from '../project/project.entity';
 
@@ -77,15 +77,15 @@ export class Task extends Model<Task> {
   project: Project;
 
   // Menambahkan foreign key id dari Member
-  @ForeignKey(() => Member)
+  @ForeignKey(() => User)
   @Column({
-    type: DataType.INTEGER,
-    allowNull: true,
+    type: DataType.STRING,
+    allowNull: false,
   })
-  memberId: number;
+  userId: string;
 
-  @BelongsTo(() => Member, 'memberId') // Menyesuaikan nama foreign key
-  member: Member;
+  @BelongsTo(() => User)
+  user: User;
 
   @ForeignKey(() => Task)
   @Column({

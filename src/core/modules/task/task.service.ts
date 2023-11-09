@@ -4,12 +4,14 @@ import {
   PROJECT_REPOSITORY,
   TASK_REPOSITORY,
   TEAM_REPOSITORY,
+  USER_REPOSITORY,
 } from 'src/core/constants';
 import { Task } from './task.entity';
 import { TaskDto } from './task.dto';
 import { Team } from '../team/team.entity';
 import { Member } from '../member/member.entity';
 import { Project } from '../project/project.entity';
+import { User } from '../users/user.entity';
 
 @Injectable()
 export class TaskService {
@@ -19,34 +21,36 @@ export class TaskService {
     @Inject(TEAM_REPOSITORY) private readonly teamRepository: typeof Team,
     @Inject(MEMBER_REPOSITORY) private readonly memberRepository: typeof Member,
     @Inject(PROJECT_REPOSITORY) private readonly projectRepository: typeof Project,
+    @Inject(USER_REPOSITORY) private readonly userRepository: typeof User,
   ) {}
 
   async create(
     taskDto: TaskDto,
     teamId: number,
-    memberId: number,
+    userId: string,
     projectId: number,
   ): Promise<Task> {
-    // Pastikan idTim, memberId, dan projectId yang diberikan valid
+    // Pastikan idTim, userId, dan projectId yang diberikan valid
     const team = await this.teamRepository.findByPk(teamId);
     if (!team) {
       throw new NotFoundException(`Team with ID ${teamId} not found`);
     }
-
-    const member = await this.memberRepository.findByPk(memberId);
-    if (!member) {
-      throw new NotFoundException(`Member with ID ${memberId} not found`);
+  
+    const user = await this.userRepository.findByPk(userId);
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
     }
-
+  
     const project = await this.projectRepository.findByPk(projectId);
     if (!project) {
       throw new NotFoundException(`Project with ID ${projectId} not found`);
     }
-
+  
     // Buat tugas dengan data yang telah Anda tambahkan
-    const taskData = { ...taskDto, teamId, memberId, projectId };
-    const createdTask = await this.taskRepository.create<Task>(taskData);
+    const taskData = { ...taskDto, teamId, userId, projectId };
+const createdTask = await this.taskRepository.create<Task>(taskData);
 
+  
     // Sekarang Anda dapat mengembalikan tugas yang telah dibuat
     return createdTask;
   }
@@ -89,7 +93,7 @@ export class TaskService {
   async getTasksByUserId(userId: number): Promise<Task[]> {
     const tasks = await this.taskRepository.findAll<Task>({
       where: {
-        memberId: userId,
+        userId: userId,
       },
       include: [{ all: true }], // Mengambil semua data terkait
     });
@@ -111,17 +115,17 @@ export class TaskService {
 //   return tasks;
 // }
 
-async getTasksByMemberId(memberId: number): Promise<Task[]> {
-  const tasks = await this.taskRepository.findAll({
-    where: {
-      memberId: memberId,
-    },
-  });
-  if (!tasks || tasks.length === 0) {
-    throw new NotFoundException(`No tasks found for member with ID ${memberId}`);
-  }
-  return tasks;
-}
+// async getTasksByMemberId(memberId: number): Promise<Task[]> {
+//   const tasks = await this.taskRepository.findAll({
+//     where: {
+//       userId: memberId,
+//     },
+//   });
+//   if (!tasks || tasks.length === 0) {
+//     throw new NotFoundException(`No tasks found for member with ID ${memberId}`);
+//   }
+//   return tasks;
+// }
 
 async getTasksByForUser(forUser: string): Promise<Task[]> {
   const tasks = await this.taskRepository.findAll({

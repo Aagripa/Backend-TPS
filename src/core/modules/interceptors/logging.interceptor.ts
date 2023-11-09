@@ -11,17 +11,16 @@ export class LoggingInterceptor implements NestInterceptor {
     const method = req.method;
     const url = req.url;
     const now = Date.now();
-    const ipAddress = req.ip; // Ambil alamat IP pengguna
+    const ipAddress = req.ip;
+    const source = req.headers['user-agent'];
 
-    return next
-      .handle()
-      .pipe(
-        tap(() =>
-          this.logger.log(
-            `${method} ${url} ${Date.now() - now}ms, Accessed from: ${ipAddress}`,
-            context.getClass().name,
-          ),
+    return next.handle().pipe(
+      tap(() =>
+        this.logger.log(
+          `${method} ${url} ${Date.now() - now}ms, Accessed from: ${ipAddress}, Source: ${source}`,
+          context.getClass().name,
         ),
-      );
+      ),
+    );
   }
 }

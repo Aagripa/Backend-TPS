@@ -17,28 +17,20 @@ import { Task } from './task.entity';
 export default class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
-  @Post(':teamId/:memberId/:projectId')
-async create(
-  @Body() taskDto: TaskDto,
-  @Param('teamId', ParseIntPipe) teamId: number,
-  @Param('memberId', ParseIntPipe) memberId: number,
-  @Param('projectId', ParseIntPipe) projectId: number,
-  @Body('forUser') forUser: string,
-): Promise<{ message: string; data?: Task } | { message: string }> {
-  try {
-    const createdTask = await this.taskService.create(
-      taskDto,
-      teamId,
-      memberId,
-      projectId,
-    );
-    return { message: 'Task created successfully', data: createdTask };
-  } catch (error) {
-    if (error instanceof NotFoundException) {
-      return { message: error.message };
+  @Post(':teamId/:userId/:projectId')
+  async createTask(
+    @Body() taskDto: TaskDto,
+    @Param('teamId', ParseIntPipe) teamId: number,
+    @Param('userId') userId: string,
+    @Param('projectId', ParseIntPipe) projectId: number,
+  ) {
+    try {
+      const createdTask = await this.taskService.create(taskDto, teamId, userId, projectId);
+      return createdTask;
+    } catch (error) {
+      throw new NotFoundException(error.message);
     }
   }
-}
 
   @Get()
   async findAll(): Promise<Task[]> {
@@ -78,16 +70,16 @@ async create(
     return this.taskService.getTasksByUserId(userId);
   }
 
-  @Get('byMember/:memberId')
-  async getTasksByMemberId(@Param('memberId', ParseIntPipe) memberId: number): Promise<{ message: string; data?: Task[] } | { message: string }> {
-    try {
-      const tasks = await this.taskService.getTasksByMemberId(memberId);
-      return { message: 'Tasks retrieved successfully', data: tasks };
-    } catch (error) {
-      // Handle errors appropriately (e.g., return error message)
-      return { message: 'Error retrieving tasks' };
-    }
-  }
+  // @Get('byMember/:memberId')
+  // async getTasksByMemberId(@Param('memberId', ParseIntPipe) memberId: number): Promise<{ message: string; data?: Task[] } | { message: string }> {
+  //   try {
+  //     const tasks = await this.taskService.getTasksByMemberId(memberId);
+  //     return { message: 'Tasks retrieved successfully', data: tasks };
+  //   } catch (error) {
+  //     // Handle errors appropriately (e.g., return error message)
+  //     return { message: 'Error retrieving tasks' };
+  //   }
+  // }
   
   @Get('byUser/:forUser')
     async getTasksByForUser(@Param('forUser') forUser: string): Promise<Task[]> {
