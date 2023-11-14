@@ -10,7 +10,8 @@ export class TaskDto {
   endDate?: string;
   taskDesc?: string;
   status: Status;
-  forUser: string;
+  forUser?: string;
+  forName?: string;
   parentId?: number;
   comment?: string;
 }

@@ -27,6 +27,12 @@ export class Task extends Model<Task> {
     type: DataType.STRING,
     allowNull: true,
   })
+  forName: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
   startDate: string;
 
   @Column({
