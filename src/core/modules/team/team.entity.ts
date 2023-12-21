@@ -2,6 +2,7 @@ import { BelongsTo, Column, DataType, ForeignKey, Model, Table, HasMany } from "
 import { User } from "../users/user.entity";
 import { Member } from "../member/member.entity";
 import { Project } from "../project/project.entity";
+import { TimStatus } from "./team.enum";
 
 @Table
 export class Team extends Model<Team> {
@@ -35,4 +36,10 @@ export class Team extends Model<Team> {
   @HasMany(() => Project)
   projects: Project[];
 
+  @Column({
+    type: DataType.ENUM('active', 'arsip'),
+    allowNull: true,
+    defaultValue: 'Active',
+  })
+  status: TimStatus;
 }

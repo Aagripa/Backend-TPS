@@ -5,32 +5,56 @@ import {
   Get,
   Delete,
   Put,
+  Res,  
   Param,
   ParseIntPipe,
   NotFoundException,
+  Header,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
-import { TaskService } from './task.service';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import TaskService from './task.service';
 import { TaskDto } from './task.dto';
 import { Task } from './task.entity';
+import { Response } from 'express';
+import * as fs from 'fs';
+import * as path from 'path';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 
 @Controller('tasks')
 export default class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
   @Post(':teamId/:userId/:projectId')
-  async createTask(
-    @Body() taskDto: TaskDto,
-    @Param('teamId', ParseIntPipe) teamId: number,
-    @Param('userId') userId: string,
-    @Param('projectId', ParseIntPipe) projectId: number,
-  ) {
-    try {
-      const createdTask = await this.taskService.create(taskDto, teamId, userId, projectId);
-      return createdTask;
-    } catch (error) {
-      throw new NotFoundException(error.message);
-    }
-  }
+@UseInterceptors(FilesInterceptor('lampiran', 1, {
+  storage: diskStorage({
+    destination: './uploads',
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      const extension = extname(file.originalname);
+      cb(null, `${file.fieldname}-${uniqueSuffix}${extension}`);
+    },
+  }),
+}))
+async createTask(
+  @Body() taskDto: TaskDto,
+  @UploadedFile() files: Express.Multer.File[],
+  @Param('teamId', ParseIntPipe) teamId: number,
+  @Param('userId') userId: string,
+  @Param('projectId', ParseIntPipe) projectId: number,
+) {
+  try {
+    // Handle the uploaded files as needed
+    const createdTask = await this.taskService.create(taskDto, teamId, userId, projectId, files);
+    return createdTask;
+  } catch (error) {
+    throw new NotFoundException(error.message);
+  }}
+
+  
+
 
   @Get()
   async findAll(): Promise<Task[]> {
@@ -80,16 +104,84 @@ export default class TaskController {
   //     return { message: 'Error retrieving tasks' };
   //   }
   // }
-  
-  @Get('byUser/:forUser')
-    async getTasksByForUser(@Param('forUser') forUser: string): Promise<Task[]> {
-      const tasks = await this.taskService.getTasksByForUser(forUser);
-      return tasks;
-  
-    }
 
-    @Get('project/:projectId')
-  async getTasksByProjectId(@Param('projectId') projectId: number): Promise<Task[]> {
+  @Get('byUser/:forUser')
+  async getTasksByForUser(@Param('forUser') forUser: string): Promise<Task[]> {
+    const tasks = await this.taskService.getTasksByForUser(forUser);
+    return tasks;
+  }
+
+  @Get('project/:projectId')
+  async getTasksByProjectId(
+    @Param('projectId') projectId: number,
+  ): Promise<Task[]> {
     return this.taskService.getTasksByProjectId(projectId);
+  }
+
+  @Get('attachment/:taskId')
+  @Header('Content-Type', 'application/pdf')
+  @Header('Content-Disposition', 'attachment')
+  async getAttachmentInfo(@Param('taskId', ParseIntPipe) taskId: number, @Res() response: Response) {
+    try {
+      // Retrieve attachment information from the service
+      const attachmentInfo = await this.taskService.getAttachmentInfo(taskId);
+
+      // Send the file as a response
+      response.sendFile(attachmentInfo.filePath);
+
+      // Optionally, you can return the file information or any other response
+      return { message: 'Attachment retrieved successfully', attachmentInfo };
+    } catch (error) {
+      throw new NotFoundException(`Failed to retrieve attachment: ${error.message}`);
+    }
+  }
+
+  @Post(':taskId/upload-attachment')
+  @UseInterceptors(FileInterceptor('lampiran', { dest: './uploads' }))
+  async uploadAttachment(
+    @UploadedFile() file: Express.Multer.File,
+    @Param('taskId', ParseIntPipe) taskId: number,
+    @Res() response: Response,
+  ) {
+    try {
+      // Ensure that only PDF files are allowed
+      if (file && !this.isPDFFile(file.originalname)) {
+        return response.status(400).json({
+          message: 'Hanya Menerima File PDF',
+          status: 'error',
+        });
+      }
+
+      const uploadResult = await this.taskService.uploadAttachment(taskId, file);
+
+      // Optionally, you can return the file information or any other response
+      return response.json({
+        message: uploadResult.message,
+        filePath: uploadResult.filePath,
+        status: uploadResult.status,
+      });
+    } catch (error) {
+      return response.status(500).json({
+        message: `Failed to upload attachment: ${error.message}`,
+        error: error.message,
+        status: 'error',
+      });
+    }
+  }
+
+  // Helper function to check if the file has a PDF extension
+  private isPDFFile(fileName: string): boolean {
+    const fileExtension = path.extname(fileName).toLowerCase();
+    return fileExtension === '.pdf';
+  }
+
+  @Delete('attachment/:taskId')
+  async deleteAttachment(@Param('taskId', ParseIntPipe) taskId: number) {
+    try {
+      await this.taskService.deleteAttachment(taskId);
+      return { message: 'Attachment deleted successfully' };
+    } catch (error) {
+      throw new NotFoundException(`Failed to delete attachment: ${error.message}`);
+    }
   }
 }

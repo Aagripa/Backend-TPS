@@ -12,9 +12,11 @@ import { Team } from '../team/team.entity';
 import { Member } from '../member/member.entity';
 import { Project } from '../project/project.entity';
 import { User } from '../users/user.entity';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
-export class TaskService {
+export default class TaskService {
   private readonly logger = new Logger(TaskService.name);
   constructor(
     @Inject(TASK_REPOSITORY) private readonly taskRepository: typeof Task,
@@ -29,6 +31,7 @@ export class TaskService {
     teamId: number,
     userId: string,
     projectId: number,
+    files: Express.Multer.File[],
   ): Promise<Task> {
     // Pastikan idTim, userId, dan projectId yang diberikan valid
     const team = await this.teamRepository.findByPk(teamId);
@@ -46,13 +49,16 @@ export class TaskService {
       throw new NotFoundException(`Project with ID ${projectId} not found`);
     }
   
-    // Buat tugas dengan data yang telah Anda tambahkan
-    const taskData = { ...taskDto, teamId, userId, projectId };
-const createdTask = await this.taskRepository.create<Task>(taskData);
-
+    try {
+      // Handle the uploaded files as needed
+      const taskData = { ...taskDto, teamId, userId, projectId };
+      const createdTask = await this.taskRepository.create<Task>(taskData);
   
-    // Sekarang Anda dapat mengembalikan tugas yang telah dibuat
-    return createdTask;
+      // Sekarang Anda dapat mengembalikan tugas yang telah dibuat
+      return createdTask;
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
   }
 
   async findAll(): Promise<Task[]> {
@@ -152,5 +158,57 @@ async getTasksByProjectId(projectId: number): Promise<Task[]> {
   }
 
   return tasks;
+}
+
+async getAttachmentInfo(taskId: number) {
+  try {
+    // Retrieve attachment information from the database or any other storage
+    const fileName = `${taskId}_attachment.txt`;
+    const filePath = path.join(__dirname, 'uploads', fileName);
+
+    // Optionally, you can return the file information or any other response
+    return { message: 'Attachment information retrieved successfully', filePath };
+  } catch (error) {
+    throw new Error(`Failed to retrieve attachment information: ${error.message}`);
+  }
+}
+
+async uploadAttachment(taskId: number, file: Express.Multer.File) {
+  try {
+    // Handle the uploaded file as needed
+    const decodedContent = file ? fs.readFileSync(file.path, { encoding: 'base64' }) : null;
+
+    // Optionally, you can save the file path or perform additional processing
+    const fileName = `${taskId}_attachment.txt`;
+    const filePath = path.join(__dirname, 'uploads', fileName);
+    fs.writeFileSync(filePath, decodedContent, 'base64');
+
+    // Optionally, you can return the file information or any other response
+    return { message: 'Attachment uploaded successfully', filePath, status: 'success' };
+  } catch (error) {
+    // You can customize the error response here
+    console.error(`Failed to upload attachment: ${error.message}`);
+    return { message: 'Failed to upload attachment', error: error.message, status: 'error' };
+  }
+}
+
+async deleteAttachment(taskId: number) {
+  try {
+    // Retrieve attachment information from the database or any other storage
+    const fileName = `${taskId}_attachment.txt`;
+    const filePath = path.join(__dirname, 'uploads', fileName);
+
+    // Optionally, you can perform additional validation or checks here
+
+    // Delete the file
+    fs.unlinkSync(filePath);
+
+    // Optionally, you can update the database to reflect the deletion
+    // For example, you can set the attachment-related fields to null in the task entity
+
+    return { message: 'Attachment deleted successfully' };
+  } catch (error) {
+    throw new Error(`Failed to delete attachment: ${error.message}`);
+  }
 }
 }

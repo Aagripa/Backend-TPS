@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { TaskService } from './task.service';
+import TaskService from './task.service';
 import TaskController from './task.controller';
 import { taskProviders } from './task.providers';
 import { memberProviders } from '../member/member.providers';

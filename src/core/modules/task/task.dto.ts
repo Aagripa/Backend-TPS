@@ -1,4 +1,5 @@
 import { Status } from './status.enum';
+import { Type } from 'class-transformer';
 import { IsString, IsOptional } from 'class-validator';
 
 export class TaskDto {
@@ -14,4 +15,5 @@ export class TaskDto {
   forName?: string;
   parentId?: number;
   comment?: string;
+
 }
