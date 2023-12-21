@@ -1,0 +1,18 @@
+version: '3'
+services:
+  backend1:
+    container_name: backend_1
+    build:
+      context: .
+    ports:
+      - "4000:4000"
+    volumes:
+      - .:/var/www/backend/asana-magang
+  backend2:
+    container_name: backend_2
+    build:
+      context: .
+    ports:
+      - "4001:4000"
+    volumes:
+      - .:/var/www/backend/asana-magang
